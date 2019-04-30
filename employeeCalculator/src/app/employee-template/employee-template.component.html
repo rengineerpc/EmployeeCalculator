@@ -1,0 +1,152 @@
+<mat-card>
+  <form [formGroup]="employeesForm">
+    <div formArrayName="employees">
+      <div *ngFor="let emp of getEmployees(employeesForm); let i = index">
+        <div [formGroupName]="i">
+          <mat-card>
+            <mat-card-title>
+                <table class="full-width" cellspacing="0"><tr>
+                    <td>
+              <mat-form-field class="full-width">
+
+                <input
+                  matInput
+                  [formControlName]="'employeeName'"
+                  placeholder="Enter Employee Name"
+                  (click)="employeeNameWatch($event, i)"
+                />
+                <mat-error
+                  *ngIf="
+                    emp.controls.employeeName.invalid &&
+                    (emp.controls.employeeName.dirty ||
+                      emp.controls.employeeName.touched)
+                  "
+                  class="alert alert-danger"
+                >
+                  Employee name is required.</mat-error
+                >
+              </mat-form-field>
+              <span class="removeSpan" (click)="removeEmployee(employeesForm, i)">
+                <i class="material-icons  removeIcon md-18">
+                  remove
+                </i> Remove
+            </span>
+            </td>
+            <td><mat-form-field class="full-width">
+                <span matPrefix>$ &nbsp;</span>
+                <input matInput  id="total[i]"  [value]="(total[i] || 0) + ' each pay period'" readonly>
+            </mat-form-field></td>
+          </tr></table>
+            </mat-card-title>
+
+            <mat-card-content>
+              <mat-divider></mat-divider>
+              <mat-grid-list cols="4" rowHeight="100px">
+                <mat-grid-tile [colspan]="1" [rowspan]="2">
+                  <mat-card-subtitle
+                    *ngIf="emp.get('dependents').controls.length > 0"
+                    >Dependents</mat-card-subtitle
+                  >
+
+                  <div formArrayName="dependents">
+                    <div
+                      *ngFor="
+                        let dependent of emp.get('dependents').controls;
+                        let j = index">
+                      <table>
+                        <tr><td>
+                        <mat-form-field>
+                            <mat-label></mat-label>
+                          <input
+                            matInput
+                            [formControlName]="j"
+                            placeholder="Enter Dependent Name"
+                            (click)="dependentWatch($event, j,i)"
+                          />
+                          <mat-error
+                            *ngIf="
+                              dependent.invalid &&
+                              (dependent.dirty || dependent.touched)
+                            "
+                            class="alert alert-danger"
+                          >
+                            Dependent name is required.</mat-error
+                          >
+                        </mat-form-field>
+                        <span class="removeSpan"  (click)="removeDependent(emp.controls.dependents, j, i)">
+                            <i class="material-icons  removeIcon md-18">
+                              remove
+                            </i> Remove
+                        </span>
+
+                      </td></tr>
+                      </table>
+                    </div>
+                  </div>
+                </mat-grid-tile>
+
+                  <mat-grid-tile [colspan]="1" [rowspan]="1">
+                  <div
+                    class="addSpans"
+                    (click)="addDependent(emp.controls.dependents)"
+                  >
+                    <i class="inline-icon material-icons md-18">
+                      add
+                    </i>
+                    Add Dependent
+                  </div>
+                </mat-grid-tile>
+                <mat-grid-tile [colspan]="2" [rowspan]="2">
+                  <table>
+
+                  <div>
+                      <div *ngIf="emp.controls.employeeName.value.length > 0">
+                       <tr><td>Gross Pay:</td><td>{{wkPay | currency}}</td></tr>
+
+                          <div *ngIf="(emp.controls.employeeName.value | lowercase).charAt(0) === 'a'; else noDiscount">
+                            <tr><td> Employee Benefits Cost:</td><td><del>{{employeeBen | currency}} </del></td></tr>
+                            <tr><td> <i>-10% discount</i></td><td>- {{discountedRateEmp | currency}}</td></tr>
+                          </div>
+                            <ng-template #noDiscount>
+                               <div> <tr><td> Employee Benefits Cost:</td><td>- {{employeeBen | currency}} </td></tr></div>
+                            </ng-template>
+                      </div>
+                      <tr><hr></tr>
+                      <tr><td><b>Employee Pay Subtotal: </b></td><td>{{empTotal[i] | currency}}</td></tr>
+
+                      <span
+                        *ngFor="
+                          let dependent of emp.get('dependents').controls;
+                          let j = index
+                        "
+                      >
+
+
+                        <div *ngIf="(dependent.value | lowercase).charAt(0) === 'a'; else noDepDiscount">
+                            <tr><td>Dependent {{ j + 1 }}:</td><td><td><del> {{ dependentBen | currency}}</del></td></tr>
+                            <tr><td> <i>-10% discount</i></td><td>- {{discountedRateDep | currency}}</td></tr>
+                          </div>
+                            <ng-template #noDepDiscount>
+                               <div>   <tr><td>Dependent {{ j + 1 }}:</td><td>- {{ dependentBen | currency}}</td></tr></div>
+                            </ng-template>
+                    </span>
+                    <tr><hr></tr>
+                    <tr><td><b>Employee Total Per Pay Period:  </b></td><td>{{total[i]|currency}}</td></tr>
+
+                  </div>
+                </table>
+                </mat-grid-tile>
+              </mat-grid-list>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+      <span class="addSpans" (click)="addEmployee()">
+        <i class=" inline-icon material-icons md-18">
+          add
+        </i>
+        Add Employee
+      </span>
+    </div>
+  </form>
+</mat-card>
